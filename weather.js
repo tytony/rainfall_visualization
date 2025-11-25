@@ -92,7 +92,7 @@ export class WeatherSystem {
             // River rises with intensity
             // Base: 0.2, Max safe: 1.0 (bank height)
             //const riverLevel = 0.2 + (val / 120) * 1.5;
-            const riverLevel = -1 + (val / 120) * 1.5;
+            const riverLevel = -0.2 + (val / 120) * 1.5; console.log(riverLevel);
             this.waterMeshes.river.position.y = riverLevel;
 
             // Flooding
@@ -132,4 +132,5 @@ export class WeatherSystem {
         this.particles.geometry.attributes.position.needsUpdate = true;
     }
 }
+
 
