@@ -36,7 +36,7 @@ export class WeatherSystem {
             color: 0xaaaaaa,
             size: 0.1,
             transparent: true,
-            opacity: 0.6,
+            opacity: 0.4,
             blending: THREE.AdditiveBlending,
             depthWrite: false
         });
@@ -60,13 +60,13 @@ export class WeatherSystem {
 
         if (val > 0) {
             // Darken sky as rain increases
-            const darkness = Math.min(val / 100, 0.8);
+            const darkness = Math.min(val / 100, 0.7);
             skyColor.lerp(new THREE.Color(0x222222), darkness);
 
             // Increase fog density
             if (val < 0.2) {
                 fogDensity = 0.02; // Misty
-            } else if (val < 10) {
+            } else if (val < 15) {
                 fogDensity = 0.005 + (val / 100) * 0.01;
             } else {
                 fogDensity = 0.01 + (val / 100) * 0.04;
@@ -132,6 +132,7 @@ export class WeatherSystem {
         this.particles.geometry.attributes.position.needsUpdate = true;
     }
 }
+
 
 
 
