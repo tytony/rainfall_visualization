@@ -39,8 +39,9 @@ dirLight.shadow.mapSize.height = 2048;
 scene.add(dirLight);
 
 // Modules
-const sceneObjects = createScene(scene);
+const { objects, waterMeshes } = createScene(scene);
 const weatherSystem = new WeatherSystem(scene);
+weatherSystem.setWaterMeshes(waterMeshes);
 const entityManager = new EntityManager(scene);
 
 // UI Logic
@@ -63,12 +64,13 @@ const intensityData = [
 
 function updateUI(intensity) {
     valueDisplay.textContent = `${intensity} mm`;
-    
+
     const data = intensityData.find(d => intensity <= d.max) || intensityData[intensityData.length - 1];
     titleDisplay.textContent = data.title;
     descDisplay.textContent = data.desc;
 
     weatherSystem.setIntensity(intensity);
+    entityManager.setIntensity(intensity);
 }
 
 slider.addEventListener('input', (e) => {
@@ -80,13 +82,13 @@ const clock = new THREE.Clock();
 
 function animate() {
     requestAnimationFrame(animate);
-    
+
     const delta = clock.getDelta();
-    
+
     controls.update();
     weatherSystem.update(delta);
     entityManager.update(delta);
-    
+
     renderer.render(scene, camera);
 }
 

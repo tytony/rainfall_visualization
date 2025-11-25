@@ -49,26 +49,46 @@ export class EntityManager {
         const pedGeometry = new THREE.CapsuleGeometry(0.3, 1, 4, 8);
         const pedMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
 
+        // Umbrella Geometry
+        const umbrellaGeo = new THREE.ConeGeometry(0.6, 0.2, 8, 1, true);
+        const umbrellaMat = new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide });
+
         for (let i = 0; i < 10; i++) {
+            const group = new THREE.Group();
+
             const ped = new THREE.Mesh(pedGeometry, pedMaterial);
             ped.castShadow = true;
-            ped.position.y = 0.8;
+            ped.position.y = 0.8; // Center of capsule is at 0, so lift it up
+            group.add(ped);
+
+            const umbrella = new THREE.Mesh(umbrellaGeo, umbrellaMat);
+            umbrella.position.y = 1.6;
+            umbrella.visible = false; // Hidden by default
+            group.add(umbrella);
 
             // Random position on sidewalks (approximate)
-            ped.position.x = (Math.random() - 0.5) * 40;
-            ped.position.z = (Math.random() - 0.5) * 40;
+            group.position.x = (Math.random() - 0.5) * 40;
+            group.position.z = (Math.random() - 0.5) * 40;
 
             // Avoid roads (simple check)
-            if (Math.abs(ped.position.x) < 6) ped.position.x += 10;
-            if (Math.abs(ped.position.z) < 6) ped.position.z += 10;
+            if (Math.abs(group.position.x) < 6) group.position.x += 10;
+            if (Math.abs(group.position.z) < 6) group.position.z += 10;
 
-            ped.userData = {
-                velocity: new THREE.Vector3((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
+            group.userData = {
+                velocity: new THREE.Vector3((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2),
+                umbrella: umbrella
             };
 
-            this.scene.add(ped);
-            this.pedestrians.push(ped);
+            this.scene.add(group);
+            this.pedestrians.push(group);
         }
+    }
+
+    setIntensity(val) {
+        const useUmbrella = val > 1;
+        this.pedestrians.forEach(ped => {
+            ped.userData.umbrella.visible = useUmbrella;
+        });
     }
 
     update(delta) {

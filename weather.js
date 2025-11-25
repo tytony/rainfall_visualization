@@ -8,9 +8,14 @@ export class WeatherSystem {
         this.particles = null;
         this.positions = null;
         this.velocities = null;
+        this.waterMeshes = null;
 
         this.initRainSystem();
         this.initFog();
+    }
+
+    setWaterMeshes(meshes) {
+        this.waterMeshes = meshes;
     }
 
     initRainSystem() {
@@ -76,14 +81,30 @@ export class WeatherSystem {
         this.particles.visible = val > 0;
 
         // Adjust particle count based on intensity
-        // Map 0-100mm to 0-maxParticles
-        // Non-linear mapping for better visual effect
         const countRatio = Math.min(val / 80, 1);
         this.particles.geometry.setDrawRange(0, Math.floor(this.maxParticles * countRatio));
 
-        // Adjust rain speed/size visual (simulated by opacity and size in shader if we had one, here just basic material)
         this.particles.material.opacity = Math.min(0.3 + (val / 100) * 0.5, 0.8);
         this.particles.material.size = Math.max(0.1, Math.min(0.1 + (val / 100) * 0.2, 0.3));
+
+        // Update Water Levels
+        if (this.waterMeshes) {
+            // River rises with intensity
+            // Base: 0.2, Max safe: 1.0 (bank height)
+            const riverLevel = 0.2 + (val / 120) * 1.5;
+            this.waterMeshes.river.position.y = riverLevel;
+
+            // Flooding
+            if (val > 70) {
+                this.waterMeshes.flood.material.opacity = 0.8;
+                // Rise from 0.05 to 0.5 (knee deep)
+                const floodLevel = 0.05 + ((val - 70) / 50) * 0.5;
+                this.waterMeshes.flood.position.y = floodLevel;
+            } else {
+                this.waterMeshes.flood.material.opacity = 0.0;
+                this.waterMeshes.flood.position.y = 0.05;
+            }
+        }
     }
 
     update(delta) {

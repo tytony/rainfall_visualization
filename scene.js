@@ -1,16 +1,62 @@
+```javascript
 import * as THREE from 'three';
 
 export function createScene(scene) {
     const objects = [];
+    const waterMeshes = {};
 
-    // Ground
+    // Ground (Grass)
     const groundGeometry = new THREE.PlaneGeometry(200, 200);
-    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 1.0 }); // Grass Green
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
     objects.push(ground);
+
+    // River Channel (Visual only, simple depression simulation by placing water lower)
+    // We'll make a "river bed" by just having a gap or a lower plane if we were doing terrain,
+    // but for simplicity, we'll place a blue plane that rises.
+    // Let's make a river running parallel to one road, say at x = -60
+    
+    const riverBedGeo = new THREE.PlaneGeometry(20, 200);
+    const riverBedMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 }); // Dark dirt
+    const riverBed = new THREE.Mesh(riverBedGeo, riverBedMat);
+    riverBed.rotation.x = -Math.PI / 2;
+    riverBed.position.set(-60, 0.01, 0); // Slightly above ground to avoid z-fighting if we didn't cut a hole
+    scene.add(riverBed);
+    // Note: In a real engine we'd cut the terrain, here we just paint over it or assume it's lower.
+    // To make it look like a river, we need the water to be "in" it.
+    
+    // River Water
+    const riverGeo = new THREE.PlaneGeometry(18, 200);
+    const riverMat = new THREE.MeshStandardMaterial({ 
+        color: 0x2196f3, 
+        transparent: true, 
+        opacity: 0.8,
+        roughness: 0.1,
+        metalness: 0.8
+    });
+    const riverWater = new THREE.Mesh(riverGeo, riverMat);
+    riverWater.rotation.x = -Math.PI / 2;
+    riverWater.position.set(-60, 0.2, 0); // Initial low level
+    scene.add(riverWater);
+    waterMeshes.river = riverWater;
+
+    // Flood Water (Global)
+    const floodGeo = new THREE.PlaneGeometry(200, 200);
+    const floodMat = new THREE.MeshStandardMaterial({ 
+        color: 0x5d4037, // Muddy flood water
+        transparent: true, 
+        opacity: 0.0, // Invisible initially
+        roughness: 0.2,
+        metalness: 0.5
+    });
+    const floodWater = new THREE.Mesh(floodGeo, floodMat);
+    floodWater.rotation.x = -Math.PI / 2;
+    floodWater.position.y = 0.05; // Just above ground
+    scene.add(floodWater);
+    waterMeshes.flood = floodWater;
 
     // Roads
     const roadGeometry = new THREE.PlaneGeometry(20, 200);
@@ -18,7 +64,7 @@ export function createScene(scene) {
 
     const road1 = new THREE.Mesh(roadGeometry, roadMaterial);
     road1.rotation.x = -Math.PI / 2;
-    road1.position.y = 0.01; // Slightly above ground
+    road1.position.y = 0.02; // Above ground/flood initially
     road1.receiveShadow = true;
     scene.add(road1);
     objects.push(road1);
@@ -26,7 +72,7 @@ export function createScene(scene) {
     const road2 = new THREE.Mesh(roadGeometry, roadMaterial);
     road2.rotation.x = -Math.PI / 2;
     road2.rotation.z = Math.PI / 2;
-    road2.position.y = 0.01;
+    road2.position.y = 0.02;
     road2.receiveShadow = true;
     scene.add(road2);
     objects.push(road2);
@@ -99,5 +145,6 @@ export function createScene(scene) {
         }
     }
 
-    return objects;
+    return { objects, waterMeshes };
 }
+```
