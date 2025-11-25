@@ -110,18 +110,45 @@ export function createScene(scene) {
         group.add(road);
         objects.push(road);
 
-        // Sidewalks
-        const sw1 = new THREE.Mesh(sidewalkGeo, sidewalkMat);
-        sw1.rotation.x = -Math.PI / 2;
-        sw1.position.x = -roadWidth / 2 - sidewalkWidth / 2;
-        sw1.receiveShadow = true;
-        group.add(sw1);
+        // Sidewalks - split into segments to avoid intersection
+        // Intersection zone is approximately -10 to +10 in local coordinates
+        const intersectionHalfSize = 10;
 
-        const sw2 = new THREE.Mesh(sidewalkGeo, sidewalkMat);
-        sw2.rotation.x = -Math.PI / 2;
-        sw2.position.x = roadWidth / 2 + sidewalkWidth / 2;
-        sw2.receiveShadow = true;
-        group.add(sw2);
+        // Create sidewalk segments before and after intersection
+        const segmentGeo1 = new THREE.PlaneGeometry(sidewalkWidth, 90); // -100 to -10
+        const segmentGeo2 = new THREE.PlaneGeometry(sidewalkWidth, 90); // +10 to +100
+
+        // Left sidewalk - before intersection
+        const sw1a = new THREE.Mesh(segmentGeo1, sidewalkMat);
+        sw1a.rotation.x = -Math.PI / 2;
+        sw1a.position.x = -roadWidth / 2 - sidewalkWidth / 2;
+        sw1a.position.z = -55; // Center at -55 (from -100 to -10)
+        sw1a.receiveShadow = true;
+        group.add(sw1a);
+
+        // Left sidewalk - after intersection
+        const sw1b = new THREE.Mesh(segmentGeo2, sidewalkMat);
+        sw1b.rotation.x = -Math.PI / 2;
+        sw1b.position.x = -roadWidth / 2 - sidewalkWidth / 2;
+        sw1b.position.z = 55; // Center at 55 (from +10 to +100)
+        sw1b.receiveShadow = true;
+        group.add(sw1b);
+
+        // Right sidewalk - before intersection
+        const sw2a = new THREE.Mesh(segmentGeo1, sidewalkMat);
+        sw2a.rotation.x = -Math.PI / 2;
+        sw2a.position.x = roadWidth / 2 + sidewalkWidth / 2;
+        sw2a.position.z = -55;
+        sw2a.receiveShadow = true;
+        group.add(sw2a);
+
+        // Right sidewalk - after intersection
+        const sw2b = new THREE.Mesh(segmentGeo2, sidewalkMat);
+        sw2b.rotation.x = -Math.PI / 2;
+        sw2b.position.x = roadWidth / 2 + sidewalkWidth / 2;
+        sw2b.position.z = 55;
+        sw2b.receiveShadow = true;
+        group.add(sw2b);
 
         // Center Line
         const line = new THREE.Mesh(lineGeo, lineMat);

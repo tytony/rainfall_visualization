@@ -64,21 +64,40 @@ export class EntityManager {
     }
 
     initPedestrians() {
-        const pedGeometry = new THREE.CapsuleGeometry(0.3, 1, 4, 8);
-        const pedMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+        // Head geometry (sphere)
+        const headGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+        // Skin color
+        const skinColor = 0xffdbac;
+
+        // Body geometry (capsule)
+        const bodyGeometry = new THREE.CapsuleGeometry(0.25, 0.8, 4, 8);
 
         // Umbrella Geometry
         const umbrellaGeo = new THREE.ConeGeometry(0.6, 0.2, 8, 1, true);
-        const umbrellaMat = new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide });
 
         for (let i = 0; i < 20; i++) {
             const group = new THREE.Group();
 
-            const ped = new THREE.Mesh(pedGeometry, pedMaterial);
-            ped.castShadow = true;
-            ped.position.y = 0.8;
-            group.add(ped);
+            // Random body color
+            const bodyColor = Math.random() * 0xffffff;
 
+            // Body
+            const bodyMaterial = new THREE.MeshStandardMaterial({ color: bodyColor });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            body.position.y = 0.6; // Body center height
+            group.add(body);
+
+            // Head
+            const headMaterial = new THREE.MeshStandardMaterial({ color: skinColor });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.castShadow = true;
+            head.position.y = 1.25; // Head on top of body
+            group.add(head);
+
+            // Umbrella with random color
+            const umbrellaColor = Math.random() * 0xffffff;
+            const umbrellaMat = new THREE.MeshStandardMaterial({ color: umbrellaColor, side: THREE.DoubleSide });
             const umbrella = new THREE.Mesh(umbrellaGeo, umbrellaMat);
             umbrella.position.y = 1.6;
             umbrella.visible = false;
