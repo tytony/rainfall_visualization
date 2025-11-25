@@ -84,8 +84,8 @@ export class WeatherSystem {
         const countRatio = Math.min(val / 80, 1);
         this.particles.geometry.setDrawRange(0, Math.floor(this.maxParticles * countRatio));
 
-        this.particles.material.opacity = Math.min(0.3 + (val / 100) * 0.5, 0.8);
-        this.particles.material.size = Math.max(0.1, Math.min(0.1 + (val / 100) * 0.2, 0.3));
+        this.particles.material.opacity = Math.min(0.3 + (val / 100) * 0.35, 0.8);
+        this.particles.material.size = Math.max(0.1, Math.min(0.1 + (val / 100) * 0.15, 0.3));
 
         // Update Water Levels
         if (this.waterMeshes) {
@@ -132,5 +132,6 @@ export class WeatherSystem {
         this.particles.geometry.attributes.position.needsUpdate = true;
     }
 }
+
 
 
