@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainfall Intensity Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div id="ui-overlay">
+        <h1>Rainfall Intensity Simulator</h1>
+        <div class="controls">
+            <label for="intensity-slider">Rainfall Intensity (mm/hr):</label>
+            <input type="range" id="intensity-slider" min="0" max="120" value="0" step="1">
+            <span id="intensity-value">0 mm</span>
+        </div>
+        <div class="description-box">
+            <h2 id="intensity-title">Dry</h2>
+            <p id="intensity-desc">No rain.</p>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
