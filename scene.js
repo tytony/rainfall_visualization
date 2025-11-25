@@ -1,4 +1,3 @@
-```javascript
 import * as THREE from 'three';
 
 export function createScene(scene) {
@@ -18,7 +17,7 @@ export function createScene(scene) {
     // We'll make a "river bed" by just having a gap or a lower plane if we were doing terrain,
     // but for simplicity, we'll place a blue plane that rises.
     // Let's make a river running parallel to one road, say at x = -60
-    
+
     const riverBedGeo = new THREE.PlaneGeometry(20, 200);
     const riverBedMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 }); // Dark dirt
     const riverBed = new THREE.Mesh(riverBedGeo, riverBedMat);
@@ -27,12 +26,12 @@ export function createScene(scene) {
     scene.add(riverBed);
     // Note: In a real engine we'd cut the terrain, here we just paint over it or assume it's lower.
     // To make it look like a river, we need the water to be "in" it.
-    
+
     // River Water
     const riverGeo = new THREE.PlaneGeometry(18, 200);
-    const riverMat = new THREE.MeshStandardMaterial({ 
-        color: 0x2196f3, 
-        transparent: true, 
+    const riverMat = new THREE.MeshStandardMaterial({
+        color: 0x2196f3,
+        transparent: true,
         opacity: 0.8,
         roughness: 0.1,
         metalness: 0.8
@@ -45,9 +44,9 @@ export function createScene(scene) {
 
     // Flood Water (Global)
     const floodGeo = new THREE.PlaneGeometry(200, 200);
-    const floodMat = new THREE.MeshStandardMaterial({ 
+    const floodMat = new THREE.MeshStandardMaterial({
         color: 0x5d4037, // Muddy flood water
-        transparent: true, 
+        transparent: true,
         opacity: 0.0, // Invisible initially
         roughness: 0.2,
         metalness: 0.5
@@ -147,4 +146,3 @@ export function createScene(scene) {
 
     return { objects, waterMeshes };
 }
-```
