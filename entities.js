@@ -11,34 +11,52 @@ export class EntityManager {
     }
 
     initCars() {
-        const carGeometry = new THREE.BoxGeometry(2, 1, 4);
-        const carMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const carGeometry = new THREE.BoxGeometry(2, 1, 4); // Long axis is Z (length 4)
+        // Note: When we rotate the car, the local Z becomes the movement axis.
 
         // Create a few cars
-        for (let i = 0; i < 5; i++) {
-            const car = new THREE.Mesh(carGeometry, carMaterial);
+        for (let i = 0; i < 10; i++) {
+            const car = new THREE.Mesh(carGeometry, new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff }));
             car.castShadow = true;
 
             // Random start position on roads
             const isHorizontal = Math.random() > 0.5;
+            const speed = 10 + Math.random() * 5;
+
+            // Lane offset: Road width 14, lanes at +/- 3.5
+            const laneOffset = 3.5;
+
             if (isHorizontal) {
-                car.position.set((Math.random() - 0.5) * 100, 0.7, (Math.random() > 0.5 ? 4 : -4));
-                car.rotation.y = Math.random() > 0.5 ? 0 : Math.PI;
+                // X-axis road (Road 2)
+                // Right hand traffic:
+                // Moving +X -> z = -3.5
+                // Moving -X -> z = +3.5
+                const movingPositive = Math.random() > 0.5;
+                const zPos = movingPositive ? -laneOffset : laneOffset;
+
+                car.position.set((Math.random() - 0.5) * 180, 0.7, zPos);
+                car.rotation.y = movingPositive ? Math.PI / 2 : -Math.PI / 2;
+
                 car.userData = {
-                    velocity: new THREE.Vector3(Math.random() > 0.5 ? 10 : -10, 0, 0),
+                    velocity: new THREE.Vector3(movingPositive ? speed : -speed, 0, 0),
                     axis: 'x'
                 };
             } else {
-                car.position.set((Math.random() > 0.5 ? 4 : -4), 0.7, (Math.random() - 0.5) * 100);
-                car.rotation.y = Math.random() > 0.5 ? Math.PI / 2 : -Math.PI / 2;
+                // Z-axis road (Road 1)
+                // Right hand traffic:
+                // Moving +Z -> x = -3.5 (Wait, if facing +Z, Right is -X) -> No, if facing +Z (South), Right is West (-X). Correct.
+                // Moving -Z -> x = +3.5
+                const movingPositive = Math.random() > 0.5;
+                const xPos = movingPositive ? -laneOffset : laneOffset;
+
+                car.position.set(xPos, 0.7, (Math.random() - 0.5) * 180);
+                car.rotation.y = movingPositive ? 0 : Math.PI;
+
                 car.userData = {
-                    velocity: new THREE.Vector3(0, 0, Math.random() > 0.5 ? 10 : -10),
+                    velocity: new THREE.Vector3(0, 0, movingPositive ? speed : -speed),
                     axis: 'z'
                 };
             }
-
-            // Random color
-            car.material = new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff });
 
             this.scene.add(car);
             this.cars.push(car);
@@ -53,31 +71,51 @@ export class EntityManager {
         const umbrellaGeo = new THREE.ConeGeometry(0.6, 0.2, 8, 1, true);
         const umbrellaMat = new THREE.MeshStandardMaterial({ color: 0x333333, side: THREE.DoubleSide });
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 20; i++) {
             const group = new THREE.Group();
 
             const ped = new THREE.Mesh(pedGeometry, pedMaterial);
             ped.castShadow = true;
-            ped.position.y = 0.8; // Center of capsule is at 0, so lift it up
+            ped.position.y = 0.8;
             group.add(ped);
 
             const umbrella = new THREE.Mesh(umbrellaGeo, umbrellaMat);
             umbrella.position.y = 1.6;
-            umbrella.visible = false; // Hidden by default
+            umbrella.visible = false;
             group.add(umbrella);
 
-            // Random position on sidewalks (approximate)
-            group.position.x = (Math.random() - 0.5) * 40;
-            group.position.z = (Math.random() - 0.5) * 40;
+            // Spawn on sidewalks
+            // Sidewalks are at +/- 8.5 from center of roads.
+            const isHorizontal = Math.random() > 0.5;
+            const side = Math.random() > 0.5 ? 1 : -1;
+            const offset = 8.5 * side;
 
-            // Avoid roads (simple check)
-            if (Math.abs(group.position.x) < 6) group.position.x += 10;
-            if (Math.abs(group.position.z) < 6) group.position.z += 10;
-
-            group.userData = {
-                velocity: new THREE.Vector3((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2),
-                umbrella: umbrella
-            };
+            if (isHorizontal) {
+                // Walking along X-axis road
+                group.position.set((Math.random() - 0.5) * 180, 0, offset);
+                // Random direction
+                const speed = 1 + Math.random();
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                group.userData = {
+                    velocity: new THREE.Vector3(dir * speed, 0, 0),
+                    umbrella: umbrella,
+                    axis: 'x',
+                    limit: 100
+                };
+                group.lookAt(group.position.clone().add(group.userData.velocity));
+            } else {
+                // Walking along Z-axis road
+                group.position.set(offset, 0, (Math.random() - 0.5) * 180);
+                const speed = 1 + Math.random();
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                group.userData = {
+                    velocity: new THREE.Vector3(0, 0, dir * speed),
+                    umbrella: umbrella,
+                    axis: 'z',
+                    limit: 100
+                };
+                group.lookAt(group.position.clone().add(group.userData.velocity));
+            }
 
             this.scene.add(group);
             this.pedestrians.push(group);
@@ -97,12 +135,13 @@ export class EntityManager {
             car.position.addScaledVector(car.userData.velocity, delta);
 
             // Loop around
+            const limit = 100;
             if (car.userData.axis === 'x') {
-                if (car.position.x > 100) car.position.x = -100;
-                if (car.position.x < -100) car.position.x = 100;
+                if (car.position.x > limit) car.position.x = -limit;
+                if (car.position.x < -limit) car.position.x = limit;
             } else {
-                if (car.position.z > 100) car.position.z = -100;
-                if (car.position.z < -100) car.position.z = 100;
+                if (car.position.z > limit) car.position.z = -limit;
+                if (car.position.z < -limit) car.position.z = limit;
             }
         });
 
@@ -111,8 +150,17 @@ export class EntityManager {
             ped.position.addScaledVector(ped.userData.velocity, delta);
 
             // Simple bounds check
-            if (Math.abs(ped.position.x) > 50 || Math.abs(ped.position.z) > 50) {
-                ped.userData.velocity.negate();
+            const limit = ped.userData.limit || 50;
+            if (ped.userData.axis === 'x') {
+                if (Math.abs(ped.position.x) > limit) {
+                    ped.userData.velocity.x *= -1; // Turn around
+                    ped.lookAt(ped.position.clone().add(ped.userData.velocity));
+                }
+            } else {
+                if (Math.abs(ped.position.z) > limit) {
+                    ped.userData.velocity.z *= -1; // Turn around
+                    ped.lookAt(ped.position.clone().add(ped.userData.velocity));
+                }
             }
         });
     }
