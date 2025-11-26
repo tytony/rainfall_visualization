@@ -89,11 +89,15 @@ export class WeatherSystem {
 
         // Update Water Levels
         if (this.waterMeshes) {
-            // River rises with intensity
-            // Base: 0.2, Max safe: 1.0 (bank height)
-            //const riverLevel = 0.2 + (val / 120) * 1.5;
-            const riverLevel = -0.2 + (val / 120) * 1.5; console.log(riverLevel);
-            this.waterMeshes.river.position.y = riverLevel;
+            // River rises with intensity, but only starts rising at 20mm
+            if (val < 20) {
+                // Keep at initial low level
+                this.waterMeshes.river.position.y = -3.5;
+            } else {
+                // Start rising from -3.5 at 20mm, reach ground level (0) around 80mm
+                const riverLevel = -3.5 + ((val - 20) / 60) * 3.5;
+                this.waterMeshes.river.position.y = riverLevel;
+            }
 
             // Flooding
             if (val > 70) {

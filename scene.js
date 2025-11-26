@@ -60,11 +60,12 @@ export function createScene(scene) {
         transparent: true,
         opacity: 0.8,
         roughness: 0.1,
-        metalness: 0.8
+        metalness: 0.8,
+        side: THREE.DoubleSide // Fix visibility from all angles
     });
     const riverWater = new THREE.Mesh(riverGeo, riverMat);
     riverWater.rotation.x = -Math.PI / 2;
-    riverWater.position.set(-60, -2, 0); // Water level below ground
+    riverWater.position.set(-60, -3.5, 0); // Lower initial water level
     scene.add(riverWater);
     waterMeshes.river = riverWater;
 
@@ -263,10 +264,13 @@ export function createScene(scene) {
     // Add trees along roads
     for (let i = -90; i <= 90; i += 15) {
         if (Math.abs(i) > 15) { // Don't block intersection
+            // Don't place trees on the river (x from -70 to -50)
+            if (i < -70 || i > -50) {
+                createTree(i, 12);
+                createTree(i, -12);
+            }
             createTree(12, i);
             createTree(-12, i);
-            createTree(i, 12);
-            createTree(i, -12);
         }
     }
 
