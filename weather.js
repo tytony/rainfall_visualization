@@ -4,7 +4,7 @@ export class WeatherSystem {
     constructor(scene) {
         this.scene = scene;
         this.intensity = 0;
-        this.maxParticles = 150000;
+        this.maxParticles = 100000;
         this.particles = null;
         this.positions = null;
         this.velocities = null;
@@ -69,7 +69,7 @@ export class WeatherSystem {
             } else if (val < 15) {
                 fogDensity = 0.005 + (val / 100) * 0.01;
             } else {
-                fogDensity = 0.01 + (val / 100) * 0.04;
+                fogDensity = 0.01 + (val / 100) * 0.04 - 0.0096;
             }
         }
 
