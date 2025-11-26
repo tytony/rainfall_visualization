@@ -310,7 +310,11 @@ export function createScene(scene) {
         // Point light (initially off)
         const pointLight = new THREE.PointLight(0xffaa55, 0, 15); // intensity 0 = off
         pointLight.position.set(1.5, 5, 0);
+<<<<<<< HEAD
         // Don't cast shadows to avoid exceeding texture unit limits
+=======
+        pointLight.castShadow = true;
+>>>>>>> 21d7407de0e0bd389f903006412cfd20d9836dc1
         group.add(pointLight);
 
         group.position.set(x, 0, z);
