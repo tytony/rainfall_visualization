@@ -274,5 +274,70 @@ export function createScene(scene) {
         }
     }
 
-    return { objects, waterMeshes };
+    // Street Lights
+    const streetLights = [];
+    const lampPostGeo = new THREE.CylinderGeometry(0.1, 0.1, 5);
+    const lampPostMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const lampArmGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.5);
+    const lampHeadGeo = new THREE.SphereGeometry(0.3, 8, 8);
+    const lampHeadMat = new THREE.MeshStandardMaterial({
+        color: 0xffff99,
+        emissive: 0xffff99,
+        emissiveIntensity: 0 // Initially off
+    });
+
+    function createStreetLight(x, z) {
+        const group = new THREE.Group();
+
+        // Post
+        const post = new THREE.Mesh(lampPostGeo, lampPostMat);
+        post.position.y = 2.5;
+        post.castShadow = true;
+        group.add(post);
+
+        // Arm (horizontal)
+        const arm = new THREE.Mesh(lampArmGeo, lampPostMat);
+        arm.rotation.z = Math.PI / 2;
+        arm.position.set(0.75, 5, 0);
+        arm.castShadow = true;
+        group.add(arm);
+
+        // Lamp head
+        const lampHead = new THREE.Mesh(lampHeadGeo, lampHeadMat.clone());
+        lampHead.position.set(1.5, 5, 0);
+        group.add(lampHead);
+
+        // Point light (initially off)
+        const pointLight = new THREE.PointLight(0xffaa55, 0, 15); // intensity 0 = off
+        pointLight.position.set(1.5, 5, 0);
+        // Don't cast shadows to avoid exceeding texture unit limits
+        group.add(pointLight);
+
+        group.position.set(x, 0, z);
+        scene.add(group);
+
+        // Store references for later control
+        streetLights.push({
+            group: group,
+            lampHead: lampHead,
+            pointLight: pointLight
+        });
+    }
+
+    // Place street lights along roads
+    for (let i = -90; i <= 90; i += 30) {
+        if (Math.abs(i) > 15) { // Skip intersection
+            // Along Z-axis road
+            createStreetLight(11, i);
+            createStreetLight(-11, i);
+
+            // Along X-axis road (skip river area)
+            if (i < -70 || i > -50) {
+                createStreetLight(i, 11);
+                createStreetLight(i, -11);
+            }
+        }
+    }
+
+    return { objects, waterMeshes, streetLights };
 }

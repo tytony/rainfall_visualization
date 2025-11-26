@@ -39,9 +39,10 @@ dirLight.shadow.mapSize.height = 2048;
 scene.add(dirLight);
 
 // Modules
-const { objects, waterMeshes } = createScene(scene);
+const { objects, waterMeshes, streetLights } = createScene(scene);
 const weatherSystem = new WeatherSystem(scene);
 weatherSystem.setWaterMeshes(waterMeshes);
+weatherSystem.setStreetLights(streetLights);
 const entityManager = new EntityManager(scene);
 
 // UI Logic

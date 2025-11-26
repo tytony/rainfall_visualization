@@ -9,6 +9,7 @@ export class WeatherSystem {
         this.positions = null;
         this.velocities = null;
         this.waterMeshes = null;
+        this.streetLights = null;
 
         this.initRainSystem();
         this.initFog();
@@ -16,6 +17,10 @@ export class WeatherSystem {
 
     setWaterMeshes(meshes) {
         this.waterMeshes = meshes;
+    }
+
+    setStreetLights(lights) {
+        this.streetLights = lights;
     }
 
     initRainSystem() {
@@ -69,7 +74,7 @@ export class WeatherSystem {
             } else if (val < 15) {
                 fogDensity = 0.005 + (val / 100) * 0.01;
             } else {
-                fogDensity = 0.01 + (val / 100) * 0.04 - 0.0096;
+                fogDensity = 0.005 + (val / 100) * 0.02;
             }
         }
 
@@ -109,6 +114,19 @@ export class WeatherSystem {
                 this.waterMeshes.flood.material.opacity = 0.0;
                 this.waterMeshes.flood.position.y = 0.05;
             }
+        }
+
+        // Update Street Lights - turn on when rainfall > 40mm
+        if (this.streetLights) {
+            const lightsOn = val > 40;
+            const targetIntensity = lightsOn ? 1.5 : 0;
+            const targetEmissive = lightsOn ? 0.8 : 0;
+
+            this.streetLights.forEach(light => {
+                // Smoothly transition light intensity
+                light.pointLight.intensity = targetIntensity;
+                light.lampHead.material.emissiveIntensity = targetEmissive;
+            });
         }
     }
 
